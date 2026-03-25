@@ -57,11 +57,6 @@
     .intro-video { width:100%; height:100%; object-fit:cover; background:#000; }
     body[data-device="mobile"] .intro-video { object-fit:contain; }
     .intro-actions { position:absolute; right:24px; bottom:24px; display:flex; gap:12px; align-items:center; z-index:2; }
-    .intro-prompt { position:absolute; inset:0; display:none; place-items:center; padding:24px; background:linear-gradient(180deg,rgba(0,0,0,.28),rgba(0,0,0,.78)); z-index:1; }
-    .intro-prompt.visible { display:grid; }
-    .intro-prompt-card { width:min(420px,100%); padding:24px; border-radius:24px; background:rgba(12,16,20,.78); border:1px solid rgba(255,255,255,.12); color:#f4efe7; text-align:center; backdrop-filter:blur(16px); }
-    .intro-prompt-card h3 { margin:0 0 10px; font-size:clamp(1.4rem,4vw,2rem); }
-    .intro-prompt-card p { margin:0 0 16px; color:rgba(244,239,231,.78); line-height:1.6; }
     .countdown-glow { position:absolute; inset:0; pointer-events:none; background:radial-gradient(circle at center, rgba(241,139,99,.14), transparent 40%); }
     .eyebrow { display:inline-flex; align-items:center; gap:10px; width:fit-content; padding:10px 14px; border-radius:999px; background:var(--accent-soft); color:var(--accent); font-weight:800; letter-spacing:.02em; text-transform:uppercase; font-size:.78rem; }
     .eyebrow::before { content:""; width:10px; height:10px; border-radius:50%; background:currentColor; box-shadow:0 0 0 0 rgba(191,90,54,.45); animation:pulse 1.8s infinite; }
@@ -99,7 +94,7 @@
     @keyframes fadeSlide { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
     @keyframes archiveReveal { from { opacity:0; transform:translateY(18px) scale(.99); } to { opacity:1; transform:translateY(0) scale(1); } }
     @keyframes releaseFlash { 0% { opacity:0; transform:scale(.92); } 22% { opacity:1; transform:scale(1); } 100% { opacity:0; transform:scale(1.08); } }
-    @media (max-width:760px) { .shell { padding:14px; } .panel { padding:20px; border-radius:24px; } .topbar { flex-direction:column; align-items:stretch; margin-bottom:24px; } .controls { width:100%; justify-content:flex-start; } .audio-controls { width:100%; justify-content:space-between; } .audio-controls input[type="range"] { width:100%; max-width:160px; } .tab-row { overflow-x:auto; flex-wrap:nowrap; scrollbar-width:none; } .tab-row::-webkit-scrollbar { display:none; } .timer, .archive-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .intro-actions { left:16px; right:16px; bottom:16px; justify-content:space-between; } .skip-button, .sound-toggle, .toggle button, .tab-button { min-height:44px; } }
+    @media (max-width:760px) { .shell { padding:14px; } .panel { padding:20px; border-radius:24px; } .topbar { flex-direction:column; align-items:stretch; margin-bottom:24px; } .controls { width:100%; justify-content:flex-start; } .audio-controls { width:100%; justify-content:space-between; } .audio-controls input[type="range"] { width:100%; max-width:160px; } .tab-row { overflow-x:auto; flex-wrap:nowrap; scrollbar-width:none; } .tab-row::-webkit-scrollbar { display:none; } .timer, .archive-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .intro-actions { left:16px; right:16px; bottom:16px; justify-content:flex-end; } .skip-button, .sound-toggle, .toggle button, .tab-button { min-height:44px; } }
     @media (max-width:560px) { h1 { max-width:12ch; } .timer, .archive-grid { grid-template-columns:1fr; } .card, .archive-panel { padding:18px 16px; } .admin-panel { left:0; right:auto; width:min(320px,calc(100vw - 28px)); } }
     @media (prefers-reduced-motion:reduce) { *, *::before, *::after { animation:none !important; transition:none !important; scroll-behavior:auto !important; } }
   </style>
@@ -161,11 +156,13 @@
           <button type="button" class="tab-button active" data-tab="photos" data-key="tabPhotos">Photos</button>
           <button type="button" class="tab-button" data-tab="gems" data-key="tabGems">&#128142; Gem &#128142;</button>
           <button type="button" class="tab-button" data-tab="voices" data-key="tabVoices">Voice Messages</button>
+          <button type="button" class="tab-button" data-tab="mp4s" data-key="tabMp4s">MP4 Videos</button>
           <button type="button" class="tab-button" data-tab="videos" data-key="tabVideos">Videos</button>
         </div>
         <div class="tab-content active" id="tab-photos"></div>
         <div class="tab-content" id="tab-gems"></div>
         <div class="tab-content" id="tab-voices"></div>
+        <div class="tab-content" id="tab-mp4s"></div>
         <div class="tab-content" id="tab-videos"></div>
       </section>
     </section>
@@ -174,13 +171,6 @@
     <div class="intro-shell">
       <div class="countdown-glow"></div>
       <video id="intro-video" class="intro-video" playsinline muted preload="auto" src="assets/Intro.mp4"></video>
-      <div class="intro-prompt" id="intro-prompt">
-        <div class="intro-prompt-card">
-          <h3 data-key="introPromptTitle">Start Intro</h3>
-          <p data-key="introPromptBody">If your phone blocks autoplay, tap below and the intro will start fullscreen.</p>
-          <button type="button" class="skip-button" id="intro-start">Play Intro</button>
-        </div>
-      </div>
       <div class="intro-actions">
         <button type="button" class="skip-button" id="skip-intro">Skip Intro</button>
       </div>
@@ -188,7 +178,7 @@
   </div>
   <audio id="bg-audio" loop autoplay preload="auto" src="assets/Background/Background.mp3"></audio>
   <script>
-    const html = document.documentElement, body = document.body, hero = document.getElementById("hero"), archive = document.getElementById("archive"), flash = document.getElementById("flash"), topbar = document.querySelector(".topbar"), bgAudio = document.getElementById("bg-audio"), bgVolume = document.getElementById("bg-volume"), soundToggle = document.getElementById("sound-toggle"), introVideo = document.getElementById("intro-video"), introOverlay = document.getElementById("intro-overlay"), introPrompt = document.getElementById("intro-prompt"), introStart = document.getElementById("intro-start"), skipIntro = document.getElementById("skip-intro"), adminToggle = document.getElementById("admin-toggle"), adminPanel = document.getElementById("admin-panel"), adminCode = document.getElementById("admin-code"), adminApply = document.getElementById("admin-apply"), adminReset = document.getElementById("admin-reset"), adminStatus = document.getElementById("admin-status");
+    const html = document.documentElement, body = document.body, hero = document.getElementById("hero"), archive = document.getElementById("archive"), flash = document.getElementById("flash"), topbar = document.querySelector(".topbar"), bgAudio = document.getElementById("bg-audio"), bgVolume = document.getElementById("bg-volume"), soundToggle = document.getElementById("sound-toggle"), introVideo = document.getElementById("intro-video"), introOverlay = document.getElementById("intro-overlay"), skipIntro = document.getElementById("skip-intro"), adminToggle = document.getElementById("admin-toggle"), adminPanel = document.getElementById("admin-panel"), adminCode = document.getElementById("admin-code"), adminApply = document.getElementById("admin-apply"), adminReset = document.getElementById("admin-reset"), adminStatus = document.getElementById("admin-status");
     const assetLibrary = {
       Jaime: {
         photos: ["assets/Jaime/photos/3ac51488-0d36-4e4b-b153-3a9da4fb6c97.jpg","assets/Jaime/photos/adasda.PNG","assets/Jaime/photos/afgafagd.png","assets/Jaime/photos/agadfgad.png","assets/Jaime/photos/asdasdasgdg.PNG","assets/Jaime/photos/Capture.PNG","assets/Jaime/photos/dfbdfgsd.png","assets/Jaime/photos/image.png","assets/Jaime/photos/image13242.png","assets/Jaime/photos/image676.png","assets/Jaime/photos/IMG-20250113-WA0006.jpg","assets/Jaime/photos/IMG-20250113-WA0007.jpg","assets/Jaime/photos/IMG_0374.png","assets/Jaime/photos/IMG_0569.png","assets/Jaime/photos/IMG_0570.png","assets/Jaime/photos/IMG_0797.png","assets/Jaime/photos/IMG_0798.png","assets/Jaime/photos/IMG_0799.png","assets/Jaime/photos/IMG_0800.png","assets/Jaime/photos/Screenshot_20250609-195825.png","assets/Jaime/photos/Silver.png","assets/Jaime/photos/Silver2.PNG"],
@@ -202,8 +192,8 @@
       }
     };
     const translations = {
-      de: { eyebrow:"Release startet", title:"Jawline Fanclub Files, releasing:", description:"Countdown bis 1. April um 18:00 Uhr. Eine Sekunde nach Null uebernimmt das Intro fullscreen.", archiveEyebrow:"Archiv freigegeben", archiveTitle:"Jawline Fanclub Archive", archiveLead:"Alles lebt jetzt in einem einzigen Jawline-Fanclub-Archiv mit Fotos, Gems, Voice Messages und Videos.", tabPhotos:"Photos", tabGems:"💎 Gem 💎", tabVoices:"Voice Messages", tabVideos:"Videos", adminLabel:"Admin Code", adminHint:"Admin-Code eingeben, um lokale Steuerung in diesem Browser freizuschalten.", adminOn:"Privater 5-Sekunden-Modus ist aktiv.", adminOff:"Privater Modus wurde entfernt.", adminBad:"Falscher Code.", introPromptTitle:"Intro starten", introPromptBody:"Wenn dein Handy Autoplay blockt, tippe hier und das Intro startet sauber im Vollbild." },
-      en: { eyebrow:"Release starting", title:"Jawline Fanclub Files, releasing:", description:"Countdown to April 1 at 6:00 PM. One second after zero, the intro takes over fullscreen.", archiveEyebrow:"Archive unlocked", archiveTitle:"Jawline Fanclub Archive", archiveLead:"Everything now lives inside one unified Jawline Fanclub archive with photos, gems, voice messages, and videos.", tabPhotos:"Photos", tabGems:"💎 Gem 💎", tabVoices:"Voice Messages", tabVideos:"Videos", adminLabel:"Admin Code", adminHint:"Enter the admin code to unlock local controls for this browser.", adminOn:"Private 5-second mode is active.", adminOff:"Private mode was removed.", adminBad:"Wrong code.", introPromptTitle:"Start Intro", introPromptBody:"If your phone blocks autoplay, tap here and the intro will start cleanly in fullscreen." }
+      de: { eyebrow:"Release startet", title:"Jawline Fanclub Files, releasing:", description:"Countdown bis 1. April um 18:00 Uhr. Eine Sekunde nach Null uebernimmt das Intro fullscreen.", archiveEyebrow:"Archiv freigegeben", archiveTitle:"Jawline Fanclub Archive", archiveLead:"Alles lebt jetzt in einem einzigen Jawline-Fanclub-Archiv mit Fotos, Gems, Voice Messages und Videos.", tabPhotos:"Photos", tabGems:"💎 Gem 💎", tabVoices:"Voice Messages", tabMp4s:"MP4 Videos", tabVideos:"All Videos", adminLabel:"Admin Code", adminHint:"Admin-Code eingeben, um lokale Steuerung in diesem Browser freizuschalten.", adminOn:"Privater 5-Sekunden-Modus ist aktiv.", adminOff:"Privater Modus wurde entfernt.", adminBad:"Falscher Code." },
+      en: { eyebrow:"Release starting", title:"Jawline Fanclub Files, releasing:", description:"Countdown to April 1 at 6:00 PM. One second after zero, the intro takes over fullscreen.", archiveEyebrow:"Archive unlocked", archiveTitle:"Jawline Fanclub Archive", archiveLead:"Everything now lives inside one unified Jawline Fanclub archive with photos, gems, voice messages, and videos.", tabPhotos:"Photos", tabGems:"💎 Gem 💎", tabVoices:"Voice Messages", tabMp4s:"MP4 Videos", tabVideos:"All Videos", adminLabel:"Admin Code", adminHint:"Enter the admin code to unlock local controls for this browser.", adminOn:"Private 5-second mode is active.", adminOff:"Private mode was removed.", adminBad:"Wrong code." }
     };
     const isMobileLike = window.matchMedia("(max-width: 760px), (pointer: coarse)").matches;
     body.dataset.device = isMobileLike ? "mobile" : "desktop";
@@ -211,8 +201,8 @@
     let introFallbackTimer = null;
     let countdownTimer = null;
     let introLaunchTimer = null;
-    let introWatchdogTimer = null;
     let bgStarted = false;
+    let introDurationMs = 7000;
     const adminStorageKey = "jawline-fast-mode";
     const releaseTarget = new Date(2026, 3, 1, 18, 0, 0, 0);
     const fastCountdownMs = 5000;
@@ -228,6 +218,7 @@
       "assets/Gems/Gam4.jpg",
       "assets/Gems/Mein Kommentar - 0001.mp3"
     ];
+    const mp4Videos = [...allVideos, ...gemLibrary].filter((path) => /\.mp4$/i.test(path));
     const titleFromPath = (_path, prefix) => prefix;
     function applyLanguage(lang) {
       currentLang = lang; html.lang = lang;
@@ -291,6 +282,7 @@
       document.getElementById("tab-photos").innerHTML = `<div class="archive-grid">${allPhotos.map((path, index) => `<article class="archive-panel"><strong>PHOTO</strong><h3>${titleFromPath(path, `Photo ${index + 1}`)}</h3>${createMediaBlock(path, "image", "")}</article>`).join("")}</div>`;
       document.getElementById("tab-gems").innerHTML = gemLibrary.length ? `<div class="archive-grid">${gemLibrary.map((path, index) => `<article class="archive-panel"><strong>&#128142; GEM &#128142;</strong><h3>Gem ${index + 1}</h3>${createMediaBlock(path, inferMediaType(path), `Loaded from assets/Gems`)}</article>`).join("")}</div>` : `<div class="helper-box">No Gem files detected yet. Put any image, video, or audio file into <code>assets/Gems</code> and it belongs here.</div>`;
       document.getElementById("tab-voices").innerHTML = allVoices.length ? `<div class="archive-grid">${allVoices.map((path, index) => `<article class="archive-panel"><strong>VOICE LOG</strong><h3>${titleFromPath(path, `Voice ${index + 1}`)}</h3>${createMediaBlock(path, "audio", `Loaded from the Jawline Fanclub archive`)}</article>`).join("")}</div>` : `<div class="helper-box">No voice messages detected yet.</div>`;
+      document.getElementById("tab-mp4s").innerHTML = mp4Videos.length ? `<div class="archive-grid">${mp4Videos.map((path, index) => `<article class="archive-panel"><strong>MP4</strong><h3>${titleFromPath(path, `MP4 ${index + 1}`)}</h3>${createMediaBlock(path, "video", "")}</article>`).join("")}</div>` : `<div class="helper-box">No MP4 videos detected yet.</div>`;
       document.getElementById("tab-videos").innerHTML = `<div class="archive-grid">${allVideos.map((path, index) => `<article class="archive-panel"><strong>MEGA ARCHIVE</strong><h3>${titleFromPath(path, `Clip ${index + 1}`)}</h3>${createMediaBlock(path, "video", "")}</article>`).join("")}</div>`;
     }
     function updateCountdownDisplay(msLeft) {
@@ -307,33 +299,13 @@
     function launchIntro() {
       topbar.classList.add("releasing");
       introOverlay.classList.add("visible");
-      introPrompt.classList.remove("visible");
       introVideo.currentTime = 0;
       introVideo.controls = false;
-      const playAttempt = introVideo.play();
-      if (playAttempt && typeof playAttempt.catch === "function") {
-        playAttempt.catch(() => {
-          introPrompt.classList.add("visible");
-          if (isMobileLike) {
-            introVideo.controls = true;
-          }
-        });
-      }
-      if (introWatchdogTimer) {
-        clearTimeout(introWatchdogTimer);
-      }
-      introWatchdogTimer = setTimeout(() => {
-        if (!released && introVideo.paused) {
-          introPrompt.classList.add("visible");
-          if (isMobileLike) {
-            introVideo.controls = true;
-          }
-        }
-      }, 900);
+      introVideo.play().catch(() => {});
       if (introFallbackTimer) {
         clearTimeout(introFallbackTimer);
       }
-      introFallbackTimer = setTimeout(() => { if (!released) triggerRelease(); }, 5000);
+      introFallbackTimer = setTimeout(() => { if (!released) triggerRelease(); }, introDurationMs);
     }
     function startReleaseSequence() {
       const fastMode = localStorage.getItem(adminStorageKey) === "true";
@@ -363,11 +335,7 @@
         clearTimeout(introFallbackTimer);
         introFallbackTimer = null;
       }
-      if (introWatchdogTimer) {
-        clearTimeout(introWatchdogTimer);
-        introWatchdogTimer = null;
-      }
-      released = true; topbar.classList.add("releasing"); flash.classList.add("active"); hero.classList.add("hidden"); introOverlay.classList.remove("visible"); introPrompt.classList.remove("visible");
+      released = true; topbar.classList.add("releasing"); flash.classList.add("active"); hero.classList.add("hidden"); introOverlay.classList.remove("visible");
       setTimeout(() => { archive.classList.add("visible"); archive.scrollIntoView({ behavior:"smooth", block:"start" }); }, 380);
       setTimeout(() => topbar.classList.remove("releasing"), 1200);
       startBackgroundAudio();
@@ -437,21 +405,13 @@
     });
     bgAudio.addEventListener("play", syncSoundButton);
     bgAudio.addEventListener("pause", syncSoundButton);
-    introVideo.addEventListener("ended", () => { if (!released) triggerRelease(); });
-    introVideo.addEventListener("error", () => { if (!released) triggerRelease(); });
-    introVideo.addEventListener("playing", () => {
-      introPrompt.classList.remove("visible");
-      introVideo.controls = false;
-    });
-    introStart.addEventListener("click", async () => {
-      try {
-        introVideo.controls = false;
-        await introVideo.play();
-        introPrompt.classList.remove("visible");
-      } catch (_) {
-        introVideo.controls = true;
+    introVideo.addEventListener("loadedmetadata", () => {
+      if (Number.isFinite(introVideo.duration) && introVideo.duration > 0) {
+        introDurationMs = Math.ceil(introVideo.duration * 1000) + 750;
       }
     });
+    introVideo.addEventListener("ended", () => { if (!released) triggerRelease(); });
+    introVideo.addEventListener("error", () => { if (!released) triggerRelease(); });
     skipIntro.addEventListener("click", () => { if (!released) triggerRelease(); });
     if (localStorage.getItem(adminStorageKey) === "true") {
       adminStatus.dataset.state = "on";
