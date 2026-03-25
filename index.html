@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jawline Fanclub Files</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg:#f0e8de; --bg2:#dfd2c2; --card:rgba(255,252,247,.72); --border:rgba(92,71,50,.12); --text:#201812; --muted:#6a5a4e; --accent:#bf5a36; --accent-soft:rgba(191,90,54,.14); --shadow:0 30px 80px rgba(47,33,21,.16); --toggle:rgba(32,24,18,.08); }
+    body[data-theme="dark"] { --bg:#0d1418; --bg2:#172127; --card:rgba(14,20,25,.72); --border:rgba(200,222,225,.1); --text:#f4efe7; --muted:#9fafb5; --accent:#f18b63; --accent-soft:rgba(241,139,99,.14); --shadow:0 30px 80px rgba(0,0,0,.3); --toggle:rgba(255,255,255,.08); }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; min-height:100vh; font-family:"Manrope",sans-serif; color:var(--text); background:radial-gradient(circle at top left,rgba(255,255,255,.92),transparent 34%),radial-gradient(circle at 80% 20%,rgba(191,90,54,.14),transparent 22%),radial-gradient(circle at bottom right,rgba(52,109,97,.12),transparent 28%),linear-gradient(135deg,var(--bg) 0%,var(--bg2) 100%); overflow-x:hidden; overflow-y:auto; transition:background .28s ease,color .28s ease; }
+    body[data-theme="dark"] { background:radial-gradient(circle at top left,rgba(255,255,255,.05),transparent 28%),radial-gradient(circle at 80% 20%,rgba(241,139,99,.18),transparent 22%),radial-gradient(circle at bottom right,rgba(92,169,156,.14),transparent 28%),linear-gradient(135deg,var(--bg) 0%,var(--bg2) 100%); }
+    body::before, body::after { content:""; position:fixed; width:28rem; height:28rem; border-radius:50%; filter:blur(30px); opacity:.55; z-index:0; pointer-events:none; animation:drift 14s ease-in-out infinite; }
+    body::before { top:-8rem; right:-8rem; background:rgba(191,90,54,.16); }
+    body::after { bottom:-10rem; left:-10rem; background:rgba(52,109,97,.15); animation-delay:-7s; }
+    .flash { position:fixed; inset:0; z-index:4; pointer-events:none; background:radial-gradient(circle at center,rgba(255,255,255,.9) 0%,rgba(241,139,99,.4) 30%,rgba(13,20,24,.95) 100%); opacity:0; transform:scale(.92); }
+    .flash.active { animation:releaseFlash 1.1s cubic-bezier(.2,.8,.2,1) forwards; }
+    .shell { position:relative; z-index:1; min-height:100vh; display:grid; place-items:center; padding:24px; }
+    .panel { width:min(100%,1040px); padding:28px; border:1px solid var(--border); border-radius:32px; background:var(--card); backdrop-filter:blur(20px); box-shadow:var(--shadow); animation:rise .9s cubic-bezier(.2,.8,.2,1); }
+    .topbar { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:36px; transition:opacity .35s ease, transform .35s ease; }
+    .topbar.releasing .controls { opacity:0; transform:translateY(-18px) scale(.96); pointer-events:none; }
+    .brand, h1, h2, h3 { font-family:"Space Grotesk",sans-serif; letter-spacing:-.05em; margin:0; }
+    .brand { font-size:clamp(1.4rem,2.2vw,1.9rem); }
+    .controls, .tab-row { display:flex; flex-wrap:wrap; gap:10px; }
+    .controls { justify-content:flex-end; transition:opacity .35s ease, transform .35s ease; }
+    .audio-controls { display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:22px; background:var(--toggle); border:1px solid rgba(32,24,18,.06); }
+    body[data-theme="dark"] .audio-controls { border-color:rgba(255,255,255,.08); }
+    .audio-controls label { font-size:.82rem; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; }
+    .audio-controls input[type="range"] { width:120px; accent-color:var(--accent); }
+    .sound-toggle { border:0; background:#fff8f2; color:var(--text); font:inherit; font-weight:800; padding:9px 14px; border-radius:999px; cursor:pointer; }
+    body[data-theme="dark"] .sound-toggle { background:rgba(255,248,242,.1); }
+    .admin-wrap { position:relative; }
+    .admin-panel { position:absolute; right:0; top:calc(100% + 10px); width:min(280px,82vw); padding:14px; border-radius:20px; background:var(--card); border:1px solid var(--border); box-shadow:var(--shadow); display:none; gap:12px; }
+    .admin-panel.visible { display:grid; animation:fadeSlide .24s ease; }
+    .admin-panel label { font-size:.8rem; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; }
+    .admin-panel input { width:100%; border:1px solid var(--border); background:rgba(255,255,255,.7); color:var(--text); font:inherit; padding:11px 12px; border-radius:14px; outline:none; }
+    body[data-theme="dark"] .admin-panel input { background:rgba(255,255,255,.06); }
+    .admin-actions { display:flex; gap:10px; }
+    .admin-status { margin:0; min-height:1.2em; color:var(--muted); font-size:.92rem; }
+    .toggle, .tab-row { padding:8px; border-radius:22px; background:var(--toggle); border:1px solid rgba(32,24,18,.06); }
+    body[data-theme="dark"] .toggle, body[data-theme="dark"] .tab-row { border-color:rgba(255,255,255,.08); }
+    .toggle button, .tab-button, .member-button { border:0; background:transparent; color:var(--muted); font:inherit; font-weight:700; padding:10px 16px; border-radius:999px; cursor:pointer; transition:all .22s ease; }
+    .toggle button.active, .tab-button.active, .member-button.active { background:#fff8f2; color:var(--text); box-shadow:0 8px 20px rgba(32,24,18,.08); }
+    body[data-theme="dark"] .toggle button.active, body[data-theme="dark"] .tab-button.active, body[data-theme="dark"] .member-button.active { background:rgba(255,248,242,.1); box-shadow:0 8px 20px rgba(0,0,0,.18); }
+    .hero { display:grid; gap:24px; transition:opacity .4s ease, transform .4s ease; }
+    .hero.hidden { opacity:0; transform:translateY(-14px); pointer-events:none; height:0; overflow:hidden; margin:0; }
+    .intro-stage { display:grid; gap:18px; }
+    .intro-note { margin:0; color:var(--muted); }
+    .skip-button { border:0; background:var(--accent); color:#fff8f2; font:inherit; font-weight:800; padding:11px 16px; border-radius:999px; cursor:pointer; }
+    .intro-overlay { position:fixed; inset:0; z-index:5; background:#000; display:none; align-items:center; justify-content:center; }
+    .intro-overlay.visible { display:flex; animation:fadeSlide .35s ease; }
+    .intro-shell { width:100vw; height:100vh; position:relative; }
+    .intro-video { width:100%; height:100%; object-fit:cover; background:#000; }
+    .intro-actions { position:absolute; right:24px; bottom:24px; display:flex; gap:12px; align-items:center; z-index:2; }
+    .countdown-glow { position:absolute; inset:0; pointer-events:none; background:radial-gradient(circle at center, rgba(241,139,99,.14), transparent 40%); }
+    .eyebrow { display:inline-flex; align-items:center; gap:10px; width:fit-content; padding:10px 14px; border-radius:999px; background:var(--accent-soft); color:var(--accent); font-weight:800; letter-spacing:.02em; text-transform:uppercase; font-size:.78rem; }
+    .eyebrow::before { content:""; width:10px; height:10px; border-radius:50%; background:currentColor; box-shadow:0 0 0 0 rgba(191,90,54,.45); animation:pulse 1.8s infinite; }
+    h1 { font-size:clamp(2.8rem,9vw,6rem); line-height:.96; max-width:10ch; }
+    .subcopy, .archive-lead, .panel-copy, .media-placeholder, .file-list li, .footer-note { color:var(--muted); line-height:1.7; }
+    .subcopy, .archive-lead { margin:0; max-width:58ch; font-size:clamp(1rem,2vw,1.15rem); }
+    .timer, .archive-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; }
+    .archive-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+    .card, .archive-panel, .file-card { padding:22px 18px; border-radius:24px; background:rgba(255,255,255,.62); border:1px solid rgba(255,255,255,.58); transition:all .22s ease; }
+    body[data-theme="dark"] .card, body[data-theme="dark"] .archive-panel, body[data-theme="dark"] .file-card { background:rgba(255,255,255,.04); border-color:rgba(255,255,255,.08); }
+    .card:hover, .archive-panel:hover, .file-card:hover { transform:translateY(-4px); border-color:rgba(191,90,54,.22); background:rgba(255,255,255,.78); }
+    body[data-theme="dark"] .card:hover, body[data-theme="dark"] .archive-panel:hover, body[data-theme="dark"] .file-card:hover { background:rgba(255,255,255,.07); }
+    .value { display:block; font-family:"Space Grotesk",sans-serif; font-size:clamp(2rem,5vw,3.3rem); line-height:1; letter-spacing:-.06em; }
+    .label { display:block; margin-top:10px; color:var(--muted); font-size:.88rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
+    .release-note { display:flex; flex-wrap:wrap; gap:12px; align-items:center; color:var(--muted); }
+    .release-date { padding:10px 14px; border-radius:999px; background:rgba(32,24,18,.06); color:var(--text); font-weight:700; }
+    body[data-theme="dark"] .release-date { background:rgba(255,255,255,.08); }
+    .archive { display:none; gap:24px; animation:archiveReveal .8s cubic-bezier(.2,.8,.2,1); }
+    .archive.visible { display:grid; }
+    .tab-content { display:none; gap:16px; }
+    .tab-content.active { display:grid; animation:fadeSlide .32s ease; }
+    .archive-panel strong, .file-card strong { display:inline-block; margin-bottom:8px; font-size:.82rem; text-transform:uppercase; letter-spacing:.08em; color:var(--accent); }
+    .media-placeholder { min-height:140px; display:grid; place-items:center; text-align:center; border-radius:20px; background:linear-gradient(135deg,rgba(241,139,99,.16),rgba(92,169,156,.12)),rgba(32,24,18,.04); border:1px dashed rgba(191,90,54,.28); padding:18px; }
+    .media-frame { width:100%; min-height:160px; object-fit:cover; border-radius:18px; background:rgba(32,24,18,.08); }
+    .audio-player, .video-player { width:100%; margin-top:10px; }
+    .helper-box { padding:18px; border-radius:20px; background:rgba(32,24,18,.05); border:1px dashed rgba(191,90,54,.24); color:var(--muted); }
+    body[data-theme="dark"] .helper-box { background:rgba(255,255,255,.04); }
+    .file-list { list-style:none; margin:0; padding:0; display:grid; gap:12px; }
+    .file-list li { padding:14px 16px; border-radius:18px; background:rgba(32,24,18,.05); border:1px solid rgba(32,24,18,.06); }
+    body[data-theme="dark"] .file-list li { background:rgba(255,255,255,.05); border-color:rgba(255,255,255,.08); }
+    .swap { animation:fadeSlide .28s ease; }
+    @keyframes rise { from { opacity:0; transform:translateY(26px) scale(.985); } to { opacity:1; transform:translateY(0) scale(1); } }
+    @keyframes pulse { 0% { box-shadow:0 0 0 0 rgba(191,90,54,.35); } 70% { box-shadow:0 0 0 14px rgba(191,90,54,0); } 100% { box-shadow:0 0 0 0 rgba(191,90,54,0); } }
+    @keyframes drift { 0%,100% { transform:translate3d(0,0,0); } 50% { transform:translate3d(0,24px,0) scale(1.04); } }
+    @keyframes fadeSlide { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes archiveReveal { from { opacity:0; transform:translateY(18px) scale(.99); } to { opacity:1; transform:translateY(0) scale(1); } }
+    @keyframes releaseFlash { 0% { opacity:0; transform:scale(.92); } 22% { opacity:1; transform:scale(1); } 100% { opacity:0; transform:scale(1.08); } }
+    @media (max-width:760px) { .panel { padding:22px; border-radius:28px; } .topbar { flex-direction:column; align-items:flex-start; } .timer, .archive-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media (max-width:560px) { .timer, .archive-grid { grid-template-columns:1fr; } }
+    @media (prefers-reduced-motion:reduce) { *, *::before, *::after { animation:none !important; transition:none !important; scroll-behavior:auto !important; } }
+  </style>
+</head>
+<body data-theme="dark">
+  <div class="flash" id="flash"></div>
+  <main class="shell">
+    <section class="panel">
+      <div class="topbar">
+        <div class="brand">Jawline Fanclub Files</div>
+        <div class="controls">
+          <div class="audio-controls">
+            <button type="button" class="sound-toggle" id="sound-toggle">Play</button>
+            <label for="bg-volume">BGM</label>
+            <input id="bg-volume" type="range" min="0" max="100" value="35">
+          </div>
+          <div class="admin-wrap">
+            <button type="button" class="sound-toggle" id="admin-toggle">Admin</button>
+            <div class="admin-panel" id="admin-panel">
+              <label for="admin-code" data-key="adminLabel">Admin Code</label>
+              <input id="admin-code" type="password" inputmode="numeric" autocomplete="off" placeholder="••••">
+              <div class="admin-actions">
+                <button type="button" class="sound-toggle" id="admin-apply">Apply</button>
+                <button type="button" class="sound-toggle" id="admin-reset">Reset</button>
+              </div>
+              <p class="admin-status" id="admin-status" data-key="adminHint">Code 6741 activates a private 5-second timer on this browser only.</p>
+            </div>
+          </div>
+          <div class="toggle theme-toggle">
+            <button type="button" data-theme="dark" class="active" aria-pressed="true">Dark</button>
+            <button type="button" data-theme="light" aria-pressed="false">Light</button>
+          </div>
+          <div class="toggle lang-toggle">
+            <button type="button" data-lang="de" class="active" aria-pressed="true">GER</button>
+            <button type="button" data-lang="en" aria-pressed="false">ENG</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero" id="hero">
+        <div class="eyebrow" data-key="eyebrow">Release startet</div>
+        <h1 data-key="title">Jawline Fanclub Files, releasing:</h1>
+        <div class="intro-stage">
+          <p class="intro-note" data-key="description">Countdown bis 1. April um 18:00 Uhr. Eine Sekunde nach Null uebernimmt das Intro fullscreen.</p>
+          <div class="timer">
+            <article class="card"><span class="value" id="days">00</span><span class="label">Days</span></article>
+            <article class="card"><span class="value" id="hours">00</span><span class="label">Hours</span></article>
+            <article class="card"><span class="value" id="minutes">00</span><span class="label">Minutes</span></article>
+            <article class="card"><span class="value" id="seconds">00</span><span class="label">Seconds</span></article>
+          </div>
+        </div>
+      </div>
+
+      <section class="archive" id="archive">
+        <div class="eyebrow" data-key="archiveEyebrow">Archiv freigegeben</div>
+        <h2 data-key="archiveTitle">Jawline Fanclub Files Archive</h2>
+        <p class="archive-lead" data-key="archiveLead">Alles lebt jetzt in einem einzigen Jawline-Fanclub-Archiv mit Fotos, Gems, Voice Messages, Videos, Akten und peinlichen Highlights.</p>
+        <div class="tab-row" role="tablist">
+          <button type="button" class="tab-button active" data-tab="photos" data-key="tabPhotos">Photos</button>
+          <button type="button" class="tab-button" data-tab="gems" data-key="tabGems">&#128142; Gem &#128142;</button>
+          <button type="button" class="tab-button" data-tab="voices" data-key="tabVoices">Voice Messages</button>
+          <button type="button" class="tab-button" data-tab="videos" data-key="tabVideos">Videos</button>
+        </div>
+        <div class="tab-content active" id="tab-photos"></div>
+        <div class="tab-content" id="tab-gems"></div>
+        <div class="tab-content" id="tab-voices"></div>
+        <div class="tab-content" id="tab-videos"></div>
+      </section>
+    </section>
+  </main>
+  <div class="intro-overlay" id="intro-overlay">
+    <div class="intro-shell">
+      <div class="countdown-glow"></div>
+      <video id="intro-video" class="intro-video" playsinline muted preload="auto" src="assets/Intro.mov"></video>
+      <div class="intro-actions">
+        <button type="button" class="skip-button" id="skip-intro">Skip Intro</button>
+      </div>
+    </div>
+  </div>
+  <audio id="bg-audio" loop autoplay preload="auto" src="assets/Background/Background.mp3"></audio>
+  <script>
+    const html = document.documentElement, body = document.body, hero = document.getElementById("hero"), archive = document.getElementById("archive"), flash = document.getElementById("flash"), topbar = document.querySelector(".topbar"), bgAudio = document.getElementById("bg-audio"), bgVolume = document.getElementById("bg-volume"), soundToggle = document.getElementById("sound-toggle"), introVideo = document.getElementById("intro-video"), introOverlay = document.getElementById("intro-overlay"), skipIntro = document.getElementById("skip-intro"), adminToggle = document.getElementById("admin-toggle"), adminPanel = document.getElementById("admin-panel"), adminCode = document.getElementById("admin-code"), adminApply = document.getElementById("admin-apply"), adminReset = document.getElementById("admin-reset"), adminStatus = document.getElementById("admin-status");
+    const assetLibrary = {
+      Jaime: {
+        photos: ["assets/Jaime/photos/3ac51488-0d36-4e4b-b153-3a9da4fb6c97.jpg","assets/Jaime/photos/adasda.PNG","assets/Jaime/photos/afgafagd.png","assets/Jaime/photos/agadfgad.png","assets/Jaime/photos/asdasdasgdg.PNG","assets/Jaime/photos/Capture.PNG","assets/Jaime/photos/dfbdfgsd.png","assets/Jaime/photos/image.png","assets/Jaime/photos/image13242.png","assets/Jaime/photos/image676.png","assets/Jaime/photos/IMG-20250113-WA0006.jpg","assets/Jaime/photos/IMG-20250113-WA0007.jpg","assets/Jaime/photos/IMG_0374.png","assets/Jaime/photos/IMG_0569.png","assets/Jaime/photos/IMG_0570.png","assets/Jaime/photos/IMG_0797.png","assets/Jaime/photos/IMG_0798.png","assets/Jaime/photos/IMG_0799.png","assets/Jaime/photos/IMG_0800.png","assets/Jaime/photos/Screenshot_20250609-195825.png","assets/Jaime/photos/Silver.png","assets/Jaime/photos/Silver2.PNG"],
+        voices: ["assets/Jaime/voice-messages/JaimeUndSeineOma.mp3"],
+        videos: ["assets/Jaime/videos/Haben dir rippchen geschmeckt.mp4","assets/Jaime/videos/Jaime Baka.mp4","assets/Jaime/videos/Jaime denkt joey cheated (fortnite).mp4","assets/Jaime/videos/Jaime furtzt.mp4","assets/Jaime/videos/Jaime hat sich seit 3 monaten nicht mehr....mp4","assets/Jaime/videos/Jaime in seinem anime edit.mp4","assets/Jaime/videos/Jaime will Kai heiraten.mp4","assets/Jaime/videos/Jaime's Mutter nennt ihn Muell.mp4"]
+      },
+      Kai: {
+        photos: ["assets/Kai/photos/IMG_0029.png","assets/Kai/photos/IMG_0030.png","assets/Kai/photos/IMG_0032.png","assets/Kai/photos/IMG_0033.png","assets/Kai/photos/IMG_0254.jpg","assets/Kai/photos/IMG_0311.jpg","assets/Kai/photos/IMG_0312.jpg","assets/Kai/photos/IMG_0313.jpg","assets/Kai/photos/IMG_0318.jpg","assets/Kai/photos/IMG_0319.jpg"],
+        voices: [],
+        videos: ["assets/Kai/videos/IMG_0445.mov","assets/Kai/videos/IMG_0723.mov","assets/Kai/videos/IMG_0724.mov","assets/Kai/videos/IMG_0725.mov","assets/Kai/videos/Kai dreht durch (fortnite nwort).mp4","assets/Kai/videos/Kai seil sitler (fortnite).mp4","assets/Kai/videos/Kai war ganz gemuetlich am...mp4","assets/Kai/videos/Kai will jaimes eltern wegen spezi (fortnite).mp4"]
+      }
+    };
+    const translations = {
+      de: { eyebrow:"Release startet", title:"Jawline Fanclub Files, releasing:", description:"Countdown bis 1. April um 18:00 Uhr. Eine Sekunde nach Null uebernimmt das Intro fullscreen.", archiveEyebrow:"Archiv freigegeben", archiveTitle:"Jawline Fanclub Archive", archiveLead:"Alles lebt jetzt in einem einzigen Jawline-Fanclub-Archiv mit Fotos, Gems, Voice Messages und Videos.", tabPhotos:"Photos", tabGems:"💎 Gem 💎", tabVoices:"Voice Messages", tabVideos:"Videos", adminLabel:"Admin Code", adminHint:"Code 6741 aktiviert nur in diesem Browser einen privaten 5-Sekunden-Timer.", adminOn:"Privater 5-Sekunden-Modus ist aktiv.", adminOff:"Privater Modus wurde entfernt.", adminBad:"Falscher Code." },
+      en: { eyebrow:"Release starting", title:"Jawline Fanclub Files, releasing:", description:"Countdown to April 1 at 6:00 PM. One second after zero, the intro takes over fullscreen.", archiveEyebrow:"Archive unlocked", archiveTitle:"Jawline Fanclub Archive", archiveLead:"Everything now lives inside one unified Jawline Fanclub archive with photos, gems, voice messages, and videos.", tabPhotos:"Photos", tabGems:"💎 Gem 💎", tabVoices:"Voice Messages", tabVideos:"Videos", adminLabel:"Admin Code", adminHint:"Code 6741 activates a private 5-second timer on this browser only.", adminOn:"Private 5-second mode is active.", adminOff:"Private mode was removed.", adminBad:"Wrong code." }
+    };
+    let currentLang = "de", currentTheme = "dark", released = false;
+    let introFallbackTimer = null;
+    let countdownTimer = null;
+    let introLaunchTimer = null;
+    let bgStarted = false;
+    const adminStorageKey = "jawline-fast-mode";
+    const releaseTarget = new Date(2026, 3, 1, 18, 0, 0, 0);
+    const fastCountdownMs = 5000;
+    const allPhotos = Object.values(assetLibrary).flatMap((member) => member.photos);
+    const allVideos = Object.values(assetLibrary).flatMap((member) => member.videos);
+    const allVoices = Object.values(assetLibrary).flatMap((member) => member.voices);
+    const gemLibrary = [
+      "assets/Gems/2025-02-07_20-23-43.mp4",
+      "assets/Gems/Gam.png",
+      "assets/Gems/Gam1.png",
+      "assets/Gems/Gam2.png",
+      "assets/Gems/Gam3.PNG",
+      "assets/Gems/Gam4.jpg",
+      "assets/Gems/Mein Kommentar - 0001.mp3"
+    ];
+    const titleFromPath = (_path, prefix) => prefix;
+    function applyLanguage(lang) {
+      currentLang = lang; html.lang = lang;
+      document.querySelectorAll("[data-key]").forEach((node) => {
+        const text = translations[lang][node.dataset.key];
+        if (typeof text === "string") {
+          node.textContent = text;
+        }
+      });
+      document.querySelectorAll(".lang-toggle button").forEach((button) => {
+        const active = button.dataset.lang === lang; button.classList.toggle("active", active); button.setAttribute("aria-pressed", active ? "true" : "false");
+      });
+      if (!adminStatus.dataset.state) {
+        adminStatus.textContent = translations[lang].adminHint;
+      } else if (adminStatus.dataset.state === "on") {
+        adminStatus.textContent = translations[lang].adminOn;
+      } else if (adminStatus.dataset.state === "off") {
+        adminStatus.textContent = translations[lang].adminOff;
+      } else if (adminStatus.dataset.state === "bad") {
+        adminStatus.textContent = translations[lang].adminBad;
+      }
+      if (!released) { hero.classList.remove("swap"); void hero.offsetWidth; hero.classList.add("swap"); }
+    }
+    function applyTheme(theme) {
+      currentTheme = theme; body.dataset.theme = theme;
+      document.querySelectorAll(".theme-toggle button").forEach((button) => {
+        const active = button.dataset.theme === theme; button.classList.toggle("active", active); button.setAttribute("aria-pressed", active ? "true" : "false");
+      });
+    }
+    function setActiveTab(name) {
+      document.querySelectorAll(".tab-button").forEach((button) => {
+        const active = button.dataset.tab === name; button.classList.toggle("active", active); button.setAttribute("aria-selected", active ? "true" : "false");
+      });
+      document.querySelectorAll(".tab-content").forEach((panel) => panel.classList.toggle("active", panel.id === `tab-${name}`));
+    }
+    function createMediaBlock(path, type, fallbackText) {
+      if (type === "image") return `<img class="media-frame" src="${path}" alt="${path}" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'media-placeholder',textContent:'Missing file: ${path}'}))">`;
+      if (type === "audio") return `<audio class="audio-player" controls preload="none" src="${path}"></audio><p class="panel-copy">${fallbackText}</p>`;
+      if (type === "video") return `<video class="video-player media-frame" controls preload="metadata" src="${path}"></video>`;
+      return `<p class="panel-copy">${fallbackText}</p>`;
+    }
+    function inferMediaType(path) {
+      const normalized = path.toLowerCase();
+      if (/\.(png|jpg|jpeg|webp|gif)$/i.test(normalized)) return "image";
+      if (/\.(mp3|wav|ogg|m4a)$/i.test(normalized)) return "audio";
+      if (/\.(mp4|mov|webm|mkv)$/i.test(normalized)) return "video";
+      return "text";
+    }
+    function syncSoundButton() {
+      soundToggle.textContent = bgAudio.paused ? "Play" : "Pause";
+    }
+    function startBackgroundAudio() {
+      return bgAudio.play().then(() => {
+        bgStarted = true;
+        syncSoundButton();
+      }).catch(() => {
+        syncSoundButton();
+      });
+    }
+    function renderArchive() {
+      document.getElementById("tab-photos").innerHTML = `<div class="archive-grid">${allPhotos.map((path, index) => `<article class="archive-panel"><strong>PHOTO</strong><h3>${titleFromPath(path, `Photo ${index + 1}`)}</h3>${createMediaBlock(path, "image", "")}</article>`).join("")}</div>`;
+      document.getElementById("tab-gems").innerHTML = gemLibrary.length ? `<div class="archive-grid">${gemLibrary.map((path, index) => `<article class="archive-panel"><strong>&#128142; GEM &#128142;</strong><h3>Gem ${index + 1}</h3>${createMediaBlock(path, inferMediaType(path), `Loaded from assets/Gems`)}</article>`).join("")}</div>` : `<div class="helper-box">No Gem files detected yet. Put any image, video, or audio file into <code>assets/Gems</code> and it belongs here.</div>`;
+      document.getElementById("tab-voices").innerHTML = allVoices.length ? `<div class="archive-grid">${allVoices.map((path, index) => `<article class="archive-panel"><strong>VOICE LOG</strong><h3>${titleFromPath(path, `Voice ${index + 1}`)}</h3>${createMediaBlock(path, "audio", `Loaded from the Jawline Fanclub archive`)}</article>`).join("")}</div>` : `<div class="helper-box">No voice messages detected yet.</div>`;
+      document.getElementById("tab-videos").innerHTML = `<div class="archive-grid">${allVideos.map((path, index) => `<article class="archive-panel"><strong>MEGA ARCHIVE</strong><h3>${titleFromPath(path, `Clip ${index + 1}`)}</h3>${createMediaBlock(path, "video", "")}</article>`).join("")}</div>`;
+    }
+    function updateCountdownDisplay(msLeft) {
+      const totalSeconds = Math.max(0, Math.ceil(msLeft / 1000));
+      const days = Math.floor(totalSeconds / 86400);
+      const hours = Math.floor((totalSeconds % 86400) / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      document.getElementById("days").textContent = String(days).padStart(2, "0");
+      document.getElementById("hours").textContent = String(hours).padStart(2, "0");
+      document.getElementById("minutes").textContent = String(minutes).padStart(2, "0");
+      document.getElementById("seconds").textContent = String(seconds).padStart(2, "0");
+    }
+    function launchIntro() {
+      topbar.classList.add("releasing");
+      introOverlay.classList.add("visible");
+      introVideo.currentTime = 0;
+      introVideo.play().catch(() => {});
+      if (introFallbackTimer) {
+        clearTimeout(introFallbackTimer);
+      }
+      introFallbackTimer = setTimeout(() => { if (!released) triggerRelease(); }, 5000);
+    }
+    function startReleaseSequence() {
+      const fastMode = localStorage.getItem(adminStorageKey) === "true";
+      const targetTime = fastMode ? Date.now() + fastCountdownMs : releaseTarget.getTime();
+      updateCountdownDisplay(Math.max(0, targetTime - Date.now()));
+      countdownTimer = setInterval(() => {
+        const remaining = Math.max(0, targetTime - Date.now());
+        updateCountdownDisplay(remaining);
+        if (remaining <= 0) {
+          clearInterval(countdownTimer);
+          countdownTimer = null;
+          introLaunchTimer = setTimeout(launchIntro, 1000);
+        }
+      }, 120);
+    }
+    function triggerRelease() {
+      if (released) return;
+      if (countdownTimer) {
+        clearInterval(countdownTimer);
+        countdownTimer = null;
+      }
+      if (introLaunchTimer) {
+        clearTimeout(introLaunchTimer);
+        introLaunchTimer = null;
+      }
+      if (introFallbackTimer) {
+        clearTimeout(introFallbackTimer);
+        introFallbackTimer = null;
+      }
+      released = true; topbar.classList.add("releasing"); flash.classList.add("active"); hero.classList.add("hidden"); introOverlay.classList.remove("visible");
+      setTimeout(() => { archive.classList.add("visible"); archive.scrollIntoView({ behavior:"smooth", block:"start" }); }, 380);
+      setTimeout(() => topbar.classList.remove("releasing"), 1200);
+      startBackgroundAudio();
+    }
+    document.querySelectorAll(".lang-toggle button").forEach((button) => button.addEventListener("click", () => button.dataset.lang !== currentLang && applyLanguage(button.dataset.lang)));
+    document.querySelectorAll(".theme-toggle button").forEach((button) => button.addEventListener("click", () => button.dataset.theme !== currentTheme && applyTheme(button.dataset.theme)));
+    document.querySelectorAll(".tab-button").forEach((button) => button.addEventListener("click", () => setActiveTab(button.dataset.tab)));
+    bgAudio.volume = 0.35;
+    startBackgroundAudio();
+    bgVolume.addEventListener("input", () => { bgAudio.volume = Number(bgVolume.value) / 100; });
+    soundToggle.addEventListener("click", async () => {
+      if (bgAudio.paused) {
+        await startBackgroundAudio();
+      } else {
+        bgAudio.pause();
+        syncSoundButton();
+      }
+    });
+    const kickOffAudio = () => {
+      if (bgAudio.paused) {
+        startBackgroundAudio();
+      }
+    };
+    document.addEventListener("pointerdown", kickOffAudio, { once: true });
+    document.addEventListener("keydown", kickOffAudio, { once: true });
+    document.addEventListener("touchstart", kickOffAudio, { once: true });
+    document.addEventListener("click", kickOffAudio, { once: true });
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible" && bgAudio.paused) {
+        startBackgroundAudio();
+      }
+    });
+    adminToggle.addEventListener("click", () => {
+      adminPanel.classList.toggle("visible");
+      if (adminPanel.classList.contains("visible")) {
+        adminCode.focus();
+      }
+    });
+    adminApply.addEventListener("click", () => {
+      if (adminCode.value === "6741") {
+        localStorage.setItem(adminStorageKey, "true");
+        adminStatus.dataset.state = "on";
+        adminStatus.textContent = translations[currentLang].adminOn;
+        adminCode.value = "";
+        if (!released) {
+          window.location.reload();
+        }
+      } else {
+        adminStatus.dataset.state = "bad";
+        adminStatus.textContent = translations[currentLang].adminBad;
+        adminCode.value = "";
+      }
+    });
+    adminReset.addEventListener("click", () => {
+      localStorage.removeItem(adminStorageKey);
+      adminStatus.dataset.state = "off";
+      adminStatus.textContent = translations[currentLang].adminOff;
+      adminCode.value = "";
+      if (!released) {
+        window.location.reload();
+      }
+    });
+    adminCode.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        adminApply.click();
+      }
+    });
+    bgAudio.addEventListener("play", syncSoundButton);
+    bgAudio.addEventListener("pause", syncSoundButton);
+    introVideo.addEventListener("ended", () => { if (!released) triggerRelease(); });
+    introVideo.addEventListener("error", () => { if (!released) triggerRelease(); });
+    skipIntro.addEventListener("click", () => { if (!released) triggerRelease(); });
+    if (localStorage.getItem(adminStorageKey) === "true") {
+      adminStatus.dataset.state = "on";
+    }
+    renderArchive(); applyTheme("dark"); applyLanguage("de"); setActiveTab("photos"); syncSoundButton(); startReleaseSequence();
+  </script>
+</body>
+</html>
+
+
+
