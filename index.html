@@ -170,7 +170,7 @@
   <div class="intro-overlay" id="intro-overlay">
     <div class="intro-shell">
       <div class="countdown-glow"></div>
-      <video id="intro-video" class="intro-video" playsinline muted preload="auto" src="assets/Intro.mp4"></video>
+      <video id="intro-video" class="intro-video" playsinline webkit-playsinline autoplay muted preload="auto" src="assets/Intro.mp4"></video>
       <div class="intro-actions">
         <button type="button" class="skip-button" id="skip-intro">Skip Intro</button>
       </div>
@@ -299,9 +299,19 @@
     function launchIntro() {
       topbar.classList.add("releasing");
       introOverlay.classList.add("visible");
+      introVideo.muted = true;
+      introVideo.playsInline = true;
+      introVideo.setAttribute("muted", "");
+      introVideo.setAttribute("playsinline", "");
+      introVideo.setAttribute("webkit-playsinline", "");
       introVideo.currentTime = 0;
       introVideo.controls = false;
-      introVideo.play().catch(() => {});
+      introVideo.load();
+      introVideo.play().catch(() => {
+        if (isMobileLike) {
+          introVideo.controls = true;
+        }
+      });
       if (introFallbackTimer) {
         clearTimeout(introFallbackTimer);
       }
@@ -366,6 +376,11 @@
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "visible" && bgAudio.paused) {
         startBackgroundAudio();
+      }
+    });
+    document.addEventListener("pointerdown", () => {
+      if (introOverlay.classList.contains("visible") && introVideo.paused && !released) {
+        introVideo.play().catch(() => {});
       }
     });
     adminToggle.addEventListener("click", () => {
