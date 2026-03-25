@@ -168,7 +168,7 @@
   <div class="intro-overlay" id="intro-overlay">
     <div class="intro-shell">
       <div class="countdown-glow"></div>
-      <video id="intro-video" class="intro-video" playsinline webkit-playsinline autoplay muted preload="auto" src="assets/Intro.mp4"></video>
+      <img id="intro-video" class="intro-video" src="assets/Intro.gif" alt="Intro animation">
     </div>
   </div>
   <audio id="bg-audio" loop autoplay preload="auto" src="assets/Background/Background.mp3"></audio>
@@ -294,14 +294,7 @@
     function launchIntro() {
       topbar.classList.add("releasing");
       introOverlay.classList.add("visible");
-      introVideo.muted = true;
-      introVideo.playsInline = true;
-      introVideo.setAttribute("muted", "");
-      introVideo.setAttribute("playsinline", "");
-      introVideo.setAttribute("webkit-playsinline", "");
-      introVideo.currentTime = 0;
-      introVideo.controls = false;
-      introVideo.play().catch(() => {});
+      introVideo.src = "assets/Intro.gif?" + Date.now();
       if (introFallbackTimer) {
         clearTimeout(introFallbackTimer);
       }
@@ -405,12 +398,9 @@
     });
     bgAudio.addEventListener("play", syncSoundButton);
     bgAudio.addEventListener("pause", syncSoundButton);
-    introVideo.addEventListener("loadedmetadata", () => {
-      if (Number.isFinite(introVideo.duration) && introVideo.duration > 0) {
-        introDurationMs = Math.ceil(introVideo.duration * 1000) + 750;
-      }
+    introVideo.addEventListener("load", () => {
+      introDurationMs = 7000;
     });
-    introVideo.addEventListener("ended", () => { if (!released) triggerRelease(); });
     introVideo.addEventListener("error", () => { if (!released) triggerRelease(); });
     if (localStorage.getItem(adminStorageKey) === "true") {
       adminStatus.dataset.state = "on";
