@@ -51,12 +51,10 @@
     .intro-stage { display:grid; gap:18px; }
     .intro-note { margin:0; color:var(--muted); }
     .skip-button { border:0; background:var(--accent); color:#fff8f2; font:inherit; font-weight:800; padding:11px 16px; border-radius:999px; cursor:pointer; }
-    .intro-overlay { position:fixed; inset:0; z-index:5; background:#000; display:none; align-items:center; justify-content:center; }
+    .intro-overlay { position:fixed; inset:0; z-index:5; background:rgba(0,0,0,.72); display:none; align-items:center; justify-content:center; padding:24px; }
     .intro-overlay.visible { display:flex; animation:fadeSlide .35s ease; }
-    .intro-shell { width:100vw; height:100vh; height:100dvh; position:relative; }
-    .intro-video { width:100%; height:100%; object-fit:cover; background:#000; }
-    body[data-device="mobile"] .intro-video { object-fit:contain; }
-    .intro-actions { position:absolute; right:24px; bottom:24px; display:flex; gap:12px; align-items:center; z-index:2; }
+    .intro-shell { width:min(920px,100%); aspect-ratio:16 / 9; position:relative; border-radius:28px; overflow:hidden; border:1px solid rgba(255,255,255,.12); box-shadow:0 32px 80px rgba(0,0,0,.4); background:#000; }
+    .intro-video { width:100%; height:100%; object-fit:contain; background:#000; }
     .countdown-glow { position:absolute; inset:0; pointer-events:none; background:radial-gradient(circle at center, rgba(241,139,99,.14), transparent 40%); }
     .eyebrow { display:inline-flex; align-items:center; gap:10px; width:fit-content; padding:10px 14px; border-radius:999px; background:var(--accent-soft); color:var(--accent); font-weight:800; letter-spacing:.02em; text-transform:uppercase; font-size:.78rem; }
     .eyebrow::before { content:""; width:10px; height:10px; border-radius:50%; background:currentColor; box-shadow:0 0 0 0 rgba(191,90,54,.45); animation:pulse 1.8s infinite; }
@@ -94,7 +92,7 @@
     @keyframes fadeSlide { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
     @keyframes archiveReveal { from { opacity:0; transform:translateY(18px) scale(.99); } to { opacity:1; transform:translateY(0) scale(1); } }
     @keyframes releaseFlash { 0% { opacity:0; transform:scale(.92); } 22% { opacity:1; transform:scale(1); } 100% { opacity:0; transform:scale(1.08); } }
-    @media (max-width:760px) { .shell { padding:14px; } .panel { padding:20px; border-radius:24px; } .topbar { flex-direction:column; align-items:stretch; margin-bottom:24px; } .controls { width:100%; justify-content:flex-start; } .audio-controls { width:100%; justify-content:space-between; } .audio-controls input[type="range"] { width:100%; max-width:160px; } .tab-row { overflow-x:auto; flex-wrap:nowrap; scrollbar-width:none; } .tab-row::-webkit-scrollbar { display:none; } .timer, .archive-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .intro-actions { left:16px; right:16px; bottom:16px; justify-content:flex-end; } .skip-button, .sound-toggle, .toggle button, .tab-button { min-height:44px; } }
+    @media (max-width:760px) { .shell { padding:14px; } .panel { padding:20px; border-radius:24px; } .topbar { flex-direction:column; align-items:stretch; margin-bottom:24px; } .controls { width:100%; justify-content:flex-start; } .audio-controls { width:100%; justify-content:space-between; } .audio-controls input[type="range"] { width:100%; max-width:160px; } .tab-row { overflow-x:auto; flex-wrap:nowrap; scrollbar-width:none; } .tab-row::-webkit-scrollbar { display:none; } .timer, .archive-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .intro-overlay { padding:16px; } .intro-shell { width:100%; border-radius:22px; } .skip-button, .sound-toggle, .toggle button, .tab-button { min-height:44px; } }
     @media (max-width:560px) { h1 { max-width:12ch; } .timer, .archive-grid { grid-template-columns:1fr; } .card, .archive-panel { padding:18px 16px; } .admin-panel { left:0; right:auto; width:min(320px,calc(100vw - 28px)); } }
     @media (prefers-reduced-motion:reduce) { *, *::before, *::after { animation:none !important; transition:none !important; scroll-behavior:auto !important; } }
   </style>
@@ -171,14 +169,11 @@
     <div class="intro-shell">
       <div class="countdown-glow"></div>
       <video id="intro-video" class="intro-video" playsinline webkit-playsinline autoplay muted preload="auto" src="assets/Intro.mp4"></video>
-      <div class="intro-actions">
-        <button type="button" class="skip-button" id="skip-intro">Skip Intro</button>
-      </div>
     </div>
   </div>
   <audio id="bg-audio" loop autoplay preload="auto" src="assets/Background/Background.mp3"></audio>
   <script>
-    const html = document.documentElement, body = document.body, hero = document.getElementById("hero"), archive = document.getElementById("archive"), flash = document.getElementById("flash"), topbar = document.querySelector(".topbar"), bgAudio = document.getElementById("bg-audio"), bgVolume = document.getElementById("bg-volume"), soundToggle = document.getElementById("sound-toggle"), introVideo = document.getElementById("intro-video"), introOverlay = document.getElementById("intro-overlay"), skipIntro = document.getElementById("skip-intro"), adminToggle = document.getElementById("admin-toggle"), adminPanel = document.getElementById("admin-panel"), adminCode = document.getElementById("admin-code"), adminApply = document.getElementById("admin-apply"), adminReset = document.getElementById("admin-reset"), adminStatus = document.getElementById("admin-status");
+    const html = document.documentElement, body = document.body, hero = document.getElementById("hero"), archive = document.getElementById("archive"), flash = document.getElementById("flash"), topbar = document.querySelector(".topbar"), bgAudio = document.getElementById("bg-audio"), bgVolume = document.getElementById("bg-volume"), soundToggle = document.getElementById("sound-toggle"), introVideo = document.getElementById("intro-video"), introOverlay = document.getElementById("intro-overlay"), adminToggle = document.getElementById("admin-toggle"), adminPanel = document.getElementById("admin-panel"), adminCode = document.getElementById("admin-code"), adminApply = document.getElementById("admin-apply"), adminReset = document.getElementById("admin-reset"), adminStatus = document.getElementById("admin-status");
     const assetLibrary = {
       Jaime: {
         photos: ["assets/Jaime/photos/3ac51488-0d36-4e4b-b153-3a9da4fb6c97.jpg","assets/Jaime/photos/adasda.PNG","assets/Jaime/photos/afgafagd.png","assets/Jaime/photos/agadfgad.png","assets/Jaime/photos/asdasdasgdg.PNG","assets/Jaime/photos/Capture.PNG","assets/Jaime/photos/dfbdfgsd.png","assets/Jaime/photos/image.png","assets/Jaime/photos/image13242.png","assets/Jaime/photos/image676.png","assets/Jaime/photos/IMG-20250113-WA0006.jpg","assets/Jaime/photos/IMG-20250113-WA0007.jpg","assets/Jaime/photos/IMG_0374.png","assets/Jaime/photos/IMG_0569.png","assets/Jaime/photos/IMG_0570.png","assets/Jaime/photos/IMG_0797.png","assets/Jaime/photos/IMG_0798.png","assets/Jaime/photos/IMG_0799.png","assets/Jaime/photos/IMG_0800.png","assets/Jaime/photos/Screenshot_20250609-195825.png","assets/Jaime/photos/Silver.png","assets/Jaime/photos/Silver2.PNG"],
@@ -306,12 +301,7 @@
       introVideo.setAttribute("webkit-playsinline", "");
       introVideo.currentTime = 0;
       introVideo.controls = false;
-      introVideo.load();
-      introVideo.play().catch(() => {
-        if (isMobileLike) {
-          introVideo.controls = true;
-        }
-      });
+      introVideo.play().catch(() => {});
       if (introFallbackTimer) {
         clearTimeout(introFallbackTimer);
       }
@@ -378,11 +368,6 @@
         startBackgroundAudio();
       }
     });
-    document.addEventListener("pointerdown", () => {
-      if (introOverlay.classList.contains("visible") && introVideo.paused && !released) {
-        introVideo.play().catch(() => {});
-      }
-    });
     adminToggle.addEventListener("click", () => {
       adminPanel.classList.toggle("visible");
       if (adminPanel.classList.contains("visible")) {
@@ -427,7 +412,6 @@
     });
     introVideo.addEventListener("ended", () => { if (!released) triggerRelease(); });
     introVideo.addEventListener("error", () => { if (!released) triggerRelease(); });
-    skipIntro.addEventListener("click", () => { if (!released) triggerRelease(); });
     if (localStorage.getItem(adminStorageKey) === "true") {
       adminStatus.dataset.state = "on";
     }
